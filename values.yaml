@@ -1,0 +1,422 @@
+---
+global:
+  logLevel: info
+  splunk:
+    hec:
+      host: "127.0.0.1"
+      port: 8088
+      token: <REDACTED>
+      protocol: "http"
+      indexName: "k8s_metadata,k8s_logs"
+      insecureSSL: null
+      clientCert: null
+      clientKey: null
+      caFile: null
+      indexRouting: null
+      consume_chunk_on_4xx_errors: null
+  kubernetes:
+    clusterName: "cluster_name"
+  prometheus_enabled: null
+  monitoring_agent_enabled: null
+  monitoring_agent_index_name: null
+  monitoring_agent_bind_address: null
+  metrics:
+    service:
+      enabled: true
+      headless: true
+  serviceMonitor:
+    enabled: false
+    metricsPort: 24231
+    interval: ""
+    scrapeTimeout: 10s
+    additionalLabels: {}
+splunk-kubernetes-logging:
+  enabled: true
+  priorityClassName: system-cluster-critical
+  logLevel: null
+  namespace: null
+  fluentd:
+    path: /var/log/containers/*.log
+    exclude_path: null
+  containers:
+    path: /var/log
+    pathDest: /var/lib/docker/containers
+    logFormatType: json
+    logFormat: null
+    refreshInterval: null
+    removeBlankEvents: true
+    localTime: false
+    enableStatWatcher: true
+  k8sMetadata:
+    podLabels:
+      - app
+      - k8s-app
+      - release
+    watch: true
+    cache_ttl: 3600
+    propagate_namespace_labels: false
+  sourcetypePrefix: kube
+  rbac:
+    create: true
+    openshiftPrivilegedSccBinding: false
+  serviceAccount:
+    create: true
+    name: null
+  podSecurityPolicy:
+    create: false
+    apparmor_security: true
+    apiGroup: policy
+  splunk:
+    hec:
+      host: "127.0.0.1"
+      port: 8088
+      token: <REDACTED>
+      protocol: "http"
+      endpoint: null
+      fullUrl: null
+      indexName: "k8s_metadata,k8s_logs"
+      insecureSSL: null
+      clientCert: null
+      clientKey: null
+      caFile: null
+      consume_chunk_on_4xx_errors: null
+      gzip_compression: null
+    ingest_api:
+      serviceClientIdentifier: null
+      serviceClientSecretKey: null
+      tokenEndpoint: null
+      ingestAuthHost: null
+      ingestAPIHost: null
+      tenant: null
+      eventsEndpoint: null
+      debugIngestAPI: null
+  secret:
+    create: true
+    name: null
+  journalLogPath: /run/log/journal
+  charEncodingUtf8: false
+  logs:
+    docker:
+      from:
+        journald:
+          unit: docker.service
+      sourcetype: kube:docker
+    kubelet:
+      from:
+        journald:
+          unit: kubelet.service
+      multiline:
+        firstline: /^\w[0-1]\d[0-3]\d/
+      sourcetype: kube:kubelet
+    etcd:
+      from:
+        pod: etcd-server
+        container: etcd-container
+    etcd-minikube:
+      from:
+        pod: etcd-minikube
+        container: etcd
+    etcd-events:
+      from:
+        pod: etcd-server-events
+        container: etcd-container
+    kube-apiserver:
+      from:
+        pod: kube-apiserver
+      multiline:
+        firstline: /^\w[0-1]\d[0-3]\d/
+      sourcetype: kube:kube-apiserver
+    kube-scheduler:
+      from:
+        pod: kube-scheduler
+      multiline:
+        firstline: /^\w[0-1]\d[0-3]\d/
+      sourcetype: kube:kube-scheduler
+    kube-controller-manager:
+      from:
+        pod: kube-controller-manager
+      multiline:
+        firstline: /^\w[0-1]\d[0-3]\d/
+      sourcetype: kube:kube-controller-manager
+    kube-proxy:
+      from:
+        pod: kube-proxy
+      multiline:
+        firstline: /^\w[0-1]\d[0-3]\d/
+      sourcetype: kube:kube-proxy
+    kubedns:
+      from:
+        pod: kube-dns
+      multiline:
+        firstline: /^\w[0-1]\d[0-3]\d/
+      sourcetype: kube:kubedns
+    dnsmasq:
+      from:
+        pod: kube-dns
+      multiline:
+        firstline: /^\w[0-1]\d[0-3]\d/
+      sourcetype: kube:dnsmasq
+    dns-sidecar:
+      from:
+        pod: kube-dns
+        container: sidecar
+      multiline:
+        firstline: /^\w[0-1]\d[0-3]\d/
+      sourcetype: kube:kubedns-sidecar
+    dns-controller:
+      from:
+        pod: dns-controller
+      multiline:
+        firstline: /^\w[0-1]\d[0-3]\d/
+      sourcetype: kube:dns-controller
+    kube-dns-autoscaler:
+      from:
+        pod: kube-dns-autoscaler
+        container: autoscaler
+      multiline:
+        firstline: /^\w[0-1]\d[0-3]\d/
+      sourcetype: kube:kube-dns-autoscaler
+    kube-audit:
+      from:
+        file:
+          path: /var/log/kube-apiserver-audit.log
+      timestampExtraction:
+        format: "%Y-%m-%dT%H:%M:%SZ"
+      sourcetype: kube:apiserver-audit
+  image:
+    registry: docker.io
+    name: splunk/fluentd-hec
+    tag: 1.3.3
+    pullPolicy: IfNotPresent
+    usePullSecret: false
+    pullSecretName: null
+  environmentVar: null
+  podAnnotations: null
+  extraLabels: null
+  resources:
+    requests:
+      cpu: 100m
+      memory: 200Mi
+  bufferChunkKeys:
+    - index
+  buffer:
+    "@type": memory
+    total_limit_size: 600m
+    chunk_limit_size: 20m
+    chunk_limit_records: 100000
+    flush_interval: 5s
+    flush_thread_count: 1
+    overflow_action: block
+    retry_max_times: 10
+    retry_type: periodic
+    retry_wait: 30
+  sendAllMetadata: false
+  tolerations:
+    - key: node-role.kubernetes.io/master
+      effect: NoSchedule
+  nodeSelector:
+    kubernetes.io/os: linux
+  affinity: {}
+  extraVolumes: []
+  extraVolumeMounts: []
+  priorityClassName: null
+  kubernetes:
+    clusterName: null
+    securityContext: false
+  customMetadata: null
+  customMetadataAnnotations: null
+  customFilters: {}
+  indexFields: []
+  rollingUpdate: null
+splunk-kubernetes-objects:
+  enabled: true
+  priorityClassName: system-cluster-critical
+  logLevel: null
+  namespace: null
+  rbac:
+    create: true
+  serviceAccount:
+    create: true
+    name: null
+    usePullSecrets: false
+  podSecurityPolicy:
+    create: false
+    apparmor_security: true
+    apiGroup: policy
+  priorityClassName: null
+  kubernetes:
+    url: null
+    insecureSSL: false
+    clientCert: null
+    clientKey: null
+    caFile: null
+    bearerTokenFile: null
+    secretDir: null
+    clusterName: null
+  objects:
+    core:
+      v1:
+        - name: pods
+        - name: namespaces
+        - name: nodes
+        - name: events
+          mode: watch
+  checkpointFile:
+    name: kubernetes-objects.pos
+    volume: null
+  splunk:
+    hec:
+      host: "127.0.0.1"
+      token: <REDACTED>
+      protocol: "http"
+      port: 8088
+      fullUrl: null
+      indexName: "k8s_metadata,k8s_logs"
+      insecureSSL: null
+      clientCert: null
+      clientKey: null
+      caFile: null
+      caPath: null
+      indexRouting: null
+      consume_chunk_on_4xx_errors: null
+  secret:
+    create: true
+    name: null
+  image:
+    registry: docker.io
+    name: splunk/kube-objects
+    tag: 1.2.3
+    pullPolicy: IfNotPresent
+    usePullSecret: false
+    pullSecretName: null
+  environmentVar: null
+  podAnnotations: null
+  extraLabels: null
+  resources:
+    requests:
+      cpu: 100m
+      memory: 200Mi
+  buffer:
+    "@type": memory
+    total_limit_size: 600m
+    chunk_limit_size: 20m
+    chunk_limit_records: 10000
+    flush_interval: 5s
+    flush_thread_count: 1
+    overflow_action: block
+    retry_max_times: 10
+    retry_type: periodic
+    retry_wait: 30
+  nodeSelector:
+    kubernetes.io/os: linux
+  tolerations: []
+  affinity: {}
+  customFilters: {}
+  indexFields: []
+splunk-kubernetes-metrics:
+  enabled: true
+  priorityClassName: system-cluster-critical
+  priorityClassNameAgg: system-cluster-critical
+  logLevel: null
+  namespace: null
+  rbac:
+    create: true
+  serviceAccount:
+    create: true
+    name: null
+    usePullSecrets: false
+  podSecurityPolicy:
+    create: false
+    apparmor_security: true
+    apiGroup: policy
+  splunk:
+    hec:
+      host: "127.0.0.1"
+      port: 8088
+      token: <REDACTED>
+      protocol: "http"
+      fullUrl: null
+      indexName: "splunk_metrics"
+      insecureSSL: null
+      clientCert: null
+      clientKey: null
+      caFile: null
+      consume_chunk_on_4xx_errors: null
+  secret:
+    create: true
+    name: null
+  image:
+    registry: docker.io
+    name: splunk/k8s-metrics
+    tag: 1.2.3
+    pullPolicy: IfNotPresent
+    usePullSecret: false
+    pullsecretName: null
+  imageAgg:
+    registry: docker.io
+    name: splunk/k8s-metrics-aggr
+    tag: 1.2.3
+    pullPolicy: IfNotPresent
+    usePullSecret: false
+    pullsecretName: null
+  environmentVar: null
+  environmentVarAgg: null
+  podAnnotations: null
+  podAnnotationsAgg: null
+  extraLabels: null
+  extraLabelsAgg: null
+  resources:
+    fluent:
+      limits:
+        cpu: 200m
+        memory: 300Mi
+      requests:
+        cpu: 200m
+        memory: 300Mi
+  buffer:
+    "@type": memory
+    total_limit_size: 400m
+    chunk_limit_size: 10m
+    chunk_limit_records: 10000
+    flush_interval: 5s
+    flush_thread_count: 1
+    overflow_action: block
+    retry_max_times: 10
+    retry_type: periodic
+    retry_wait: 30
+  aggregatorBuffer:
+    "@type": memory
+    total_limit_size: 400m
+    chunk_limit_size: 10m
+    chunk_limit_records: 10000
+    flush_interval: 5s
+    flush_thread_count: 1
+    overflow_action: block
+    retry_max_times: 10
+    retry_type: periodic
+    retry_wait: 30
+  metricsInterval: 15s
+  nodeSelector:
+    kubernetes.io/os: linux
+  aggregatorNodeSelector:
+    kubernetes.io/os: linux
+  tolerations:
+    - key: node-role.kubernetes.io/master
+      effect: NoSchedule
+  aggregatorTolerations: {}
+  priorityClassName: null
+  priorityClassNameAgg: null
+  affinity: {}
+  kubernetes:
+    kubeletAddress: null
+    kubeletPort: null
+    kubeletPortAggregator: null
+    useRestClientSSL: true
+    insecureSSL: false
+    caFile: null
+    bearerTokenFile: null
+    secretDir: null
+    clusterName: null
+  customFilters: {}
+  customFiltersAggr: {}
+  rollingUpdate: null
